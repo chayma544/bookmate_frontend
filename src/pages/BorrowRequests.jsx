@@ -1,0 +1,145 @@
+import React, { useEffect, useState, useCallback } from 'react'
+import { useAuth } from '../context/AuthContext'
+import requestService from '../services/requestService'
+import { timeAgo, timeUntil, formatDate } from '../utils/time'
+
+function errorMessage(err, fallback) {
+  return err?.response?.data?.message || err?.message || fallback
+}
+
+const STATUS_BADGE = {
+  PENDING: 'bg-amber-100 text-amber-800',
+  APPROVED: 'bg-blue-100 text-blue-800',
+  REJECTED: 'bg-red-100 text-red-700',
+  EXPIRED: 'bg-gray-100 text-gray-600',
+}
+
+function describeType(req) {
+  if (req.type === 'SWAP') return req.swapMode === 'PERMANENT' ? 'Permanent swap' : 'Temporary swap'
+  return 'Borrow'
+}
+
+function sortRequests(a, b) {
+  const rank = { PENDING: 0, APPROVED: 1, REJECTED: 2, EXPIRED: 2 }
+  return (rank[a.status] ?? 3) - (rank[b.status] ?? 3) || new Date(b.updatedAt) - new Date(a.updatedAt)
+}
+
+function RequestCard({ req, perspective, onAccept, onDecline, onReturn, busy }) {
+  const other = perspective === 'incoming' ? req.borrower : req.book.owner
+  const otherName = other ? `${other.firstName} ${other.lastName}` : 'Someone'
+
+  const isActive = req.status === 'APPROVED' && !req.returnedAt
+  const canReturn = isActive && !(req.type === 'SWAP' && req.swapMode === 'PERMANENT')
+
+  return (
+    <div className="rounded-xl border border-[#efe0cf] bg-white p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-medium text-ink">
+            {perspective === 'incoming' ? `${otherName} wants ` : 'You requested '}
+            <span className="italic">{req.book.title}</span>
+            {perspective === 'outgoing' && ` from ${otherName}`}
+          </p>
+          <p className="mt-1 text-xs text-[#6b5744]">
+            {describeType(req)}
+            {req.type === 'SWAP' && req.offeredBook && ` · offering "${req.offeredBook.title}"`}
+          </p>
+          <p className="mt-1 text-xs text-[#9d7c5e]">
+            {req.status === 'PENDING' && req.respondBy && `Respond by ${formatDate(req.respondBy)} (${timeUntil(req.respondBy)})`}
+            {req.status === 'APPROVED' && !req.returnedAt && req.dueDate && `Due ${formatDate(req.dueDate)}`}
+            {req.status === 'APPROVED' && !req.returnedAt && !req.dueDate && 'Trade completed'}
+            {req.returnedAt && `Returned ${timeAgo(req.returnedAt)}`}
+            {(req.status === 'REJECTED' || req.status === 'EXPIRED') && `${req.status === 'REJECTED' ? 'Declined' : 'Expired'} ${timeAgo(req.updatedAt)}`}
+          </p>
+        </div>
+        <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${STATUS_BADGE[req.status]}`}>{req.status}</span>
+      </div>
+
+      {perspective === 'incoming' && req.status === 'PENDING' && (
+        <div className="mt-3 flex gap-2">
+          <button disabled={busy} onClick={() => onAccept(req)} className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white hover:bg-[#7a3010] disabled:opacity-60">Accept</button>
+          <button disabled={busy} onClick={() => onDecline(req)} className="rounded-full border border-[#e2ddd4] px-3 py-1 text-xs text-[#6b5744] hover:bg-[#f5ede0] disabled:opacity-60">Decline</button>
+        </div>
+      )}
+      {canReturn && (
+        <div className="mt-3">
+          <button disabled={busy} onClick={() => onReturn(req)} className="rounded-full border border-[#d8c5b3] px-3 py-1 text-xs font-medium text-[#6b5744] hover:bg-[#f5ede0] disabled:opacity-60">Mark as returned</button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default function BorrowRequests() {
+  const { user, token } = useAuth()
+  const [requests, setRequests] = useState([])
+  const [error, setError] = useState('')
+  const [busyId, setBusyId] = useState(null)
+
+  const load = useCallback(async () => {
+    try {
+      const all = await requestService.getAll(token)
+      setRequests(all)
+      setError('')
+    } catch (err) {
+      setError(errorMessage(err, 'Failed to load requests.'))
+    }
+  }, [token])
+
+  useEffect(() => { if (user) load() }, [user, load])
+
+  const incoming = requests.filter(r => r.book.ownerId === user?.id).sort(sortRequests)
+  const outgoing = requests.filter(r => r.borrowerId === user?.id).sort(sortRequests)
+
+  const act = async (fn, id) => {
+    setBusyId(id)
+    setError('')
+    try {
+      await fn()
+      await load()
+    } catch (err) {
+      setError(errorMessage(err, 'Action failed.'))
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+  const handleAccept = (req) => act(() => requestService.update(req.id, { status: 'APPROVED' }, token), req.id)
+  const handleDecline = (req) => act(() => requestService.update(req.id, { status: 'REJECTED' }, token), req.id)
+  const handleReturn = (req) => act(() => requestService.returnBook(req.id, token), req.id)
+
+  return (
+    <div className="p-6 text-ink">
+      <h2 className="mb-4 text-2xl font-semibold font-serif">Borrow Requests</h2>
+      {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <section>
+          <h3 className="mb-3 text-sm font-semibold text-[#1e1810]">Incoming — people want your books</h3>
+          {incoming.length === 0 ? (
+            <p className="text-sm text-[#6b5744]">No incoming requests.</p>
+          ) : (
+            <div className="space-y-3">
+              {incoming.map((req) => (
+                <RequestCard key={req.id} req={req} perspective="incoming" onAccept={handleAccept} onDecline={handleDecline} onReturn={handleReturn} busy={busyId === req.id} />
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section>
+          <h3 className="mb-3 text-sm font-semibold text-[#1e1810]">Outgoing — your requests to others</h3>
+          {outgoing.length === 0 ? (
+            <p className="text-sm text-[#6b5744]">You haven't requested any books yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {outgoing.map((req) => (
+                <RequestCard key={req.id} req={req} perspective="outgoing" onAccept={handleAccept} onDecline={handleDecline} onReturn={handleReturn} busy={busyId === req.id} />
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+    </div>
+  )
+}
