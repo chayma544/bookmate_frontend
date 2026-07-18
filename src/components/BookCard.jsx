@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import { formatDate, isPast } from '../utils/time'
 
 const STATUS_STYLES = {
@@ -24,32 +25,36 @@ export default function BookCard({ book, onBorrow, onSwap, onEdit, onDelete, onR
 
   return (
     <div className="group overflow-hidden rounded-2xl border border-[#e2ddd4] bg-white shadow-[0_8px_20px_rgba(139,58,15,0.05)] transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_30px_rgba(139,58,15,0.08)]">
-      <div className="relative aspect-[3/4] overflow-hidden bg-[#f5ede0]">
-        <img
-          src={book.imageUrl || book.image || FALLBACK_IMAGE}
-          alt={`Cover of ${book.title}`}
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-          loading="lazy"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#1e1810]/55 via-transparent to-transparent" />
-        <span className={`absolute left-4 top-4 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold ${STATUS_STYLES[status] || STATUS_STYLES.available}`}>
-          {statusLabel}
-        </span>
-        {dueDate && (
-          <span className={`absolute right-4 top-4 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold ${overdue ? 'bg-red-100 text-red-700' : 'bg-white/90 text-[#6b5744]'}`}>
-            {overdue ? 'Overdue' : `Due ${formatDate(dueDate)}`}
+      <Link to={`/app/books/${book.id}`} className="block">
+        <div className="relative aspect-[3/4] overflow-hidden bg-[#f5ede0]">
+          <img
+            src={book.imageUrl || book.image || FALLBACK_IMAGE}
+            alt={`Cover of ${book.title}`}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#1e1810]/55 via-transparent to-transparent" />
+          <span className={`absolute left-4 top-4 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold ${STATUS_STYLES[status] || STATUS_STYLES.available}`}>
+            {statusLabel}
           </span>
-        )}
-      </div>
-
-      <div className="p-3">
-        <div className="min-h-[64px]">
-          <h3 className="text-sm font-semibold text-[#1e1810] line-clamp-2">{book.title}</h3>
-          <p className="mt-1 text-xs text-[#6b5744]">{book.author}</p>
-          <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-[#9d7c5e]">{book.genre || book.category || 'General'}</p>
+          {dueDate && (
+            <span className={`absolute right-4 top-4 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold ${overdue ? 'bg-red-100 text-red-700' : 'bg-white/90 text-[#6b5744]'}`}>
+              {overdue ? 'Overdue' : `Due ${formatDate(dueDate)}`}
+            </span>
+          )}
         </div>
 
-        <div className="mt-3 flex items-center justify-between gap-2">
+        <div className="px-3 pt-3">
+          <div className="min-h-[64px]">
+            <h3 className="text-sm font-semibold text-[#1e1810] line-clamp-2 group-hover:text-[#8B3A0F] transition-colors">{book.title}</h3>
+            <p className="mt-1 text-xs text-[#6b5744]">{book.author}</p>
+            <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-[#9d7c5e]">{book.genre || book.category || 'General'}</p>
+          </div>
+        </div>
+      </Link>
+
+      <div className="px-3 pb-3 pt-2">
+        <div className="flex items-center justify-between gap-2">
           <div className="flex gap-2">
             {onEdit && (
               <button
