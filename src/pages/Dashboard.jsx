@@ -30,24 +30,6 @@ function findActiveRequestForBook(requests, bookId) {
 const EMPTY_FORM = { title: '', author: '', genre: '', imageUrl: '' }
 
 // ─── sub-components ───────────────────────────────────────────────────────────
-function StatCard({ label, value, sub, subColor, icon, accent }) {
-  return (
-    <div className="group bg-white rounded-xl border border-[#e2ddd4] px-5 py-4 flex-1 flex items-start gap-4 transition-shadow hover:shadow-[0_8px_20px_rgba(139,58,15,0.08)]">
-      <div
-        className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg text-lg"
-        style={{ background: `${accent}1a`, color: accent }}
-      >
-        {icon}
-      </div>
-      <div className="min-w-0">
-        <p className="text-xs text-[#6b5744] mb-1">{label}</p>
-        <p className="text-2xl font-semibold text-[#1e1810]">{value}</p>
-        {sub && <p className="text-xs mt-1" style={{ color: subColor || '#9d7c5e' }}>{sub}</p>}
-      </div>
-    </div>
-  )
-}
-
 function BookForm({ initial, onSubmit, onClose }) {
   const [form, setForm] = useState(initial || EMPTY_FORM)
   const [uploading, setUploading] = useState(false)
@@ -243,20 +225,9 @@ export default function Dashboard() {
   const declineRequest = (req) => act(() => requestService.update(req.id, { status: 'REJECTED' }, token), req.id)
   const returnBook = (req) => act(() => requestService.returnBook(req.id, token), req.id)
 
-  const activeLoans = requests.filter(r => r.status === 'APPROVED' && !r.returnedAt)
   const incomingPending = requests
     .filter(r => r.book.ownerId === user?.id && r.status === 'PENDING')
     .sort((a, b) => new Date(b.requestDate) - new Date(a.requestDate))
-
-  const owned = books.length
-  const lent = books.filter(b => b.status === 'borrowed').length
-  const borrowed = activeLoans.filter(r => r.borrowerId === user?.id).length
-    + activeLoans.filter(r => r.type === 'SWAP' && r.book.ownerId === user?.id).length
-  const swaps = requests.filter(r =>
-    r.type === 'SWAP' &&
-    (r.borrowerId === user?.id || r.book.ownerId === user?.id) &&
-    (r.status === 'PENDING' || (r.status === 'APPROVED' && !r.returnedAt))
-  ).length
 
   return (
     <>
