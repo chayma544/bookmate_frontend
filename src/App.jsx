@@ -8,6 +8,7 @@ import Marketplace from './pages/Marketplace'
 import MyBooks from './pages/MyBooks'
 import BorrowRequests from './pages/BorrowRequests'
 import Profile from './pages/Profile'
+import AppLayout from './layouts/AppLayout'
 import { AuthProvider, useAuth } from './context/AuthContext'
 
 function Protected({ children }) {
@@ -24,11 +25,13 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        <Route path="/app" element={<Protected><Dashboard /></Protected>} />
-        <Route path="/app/marketplace" element={<Protected><Marketplace /></Protected>} />
-        <Route path="/app/my-books" element={<Protected><MyBooks /></Protected>} />
-        <Route path="/app/requests" element={<Protected><BorrowRequests /></Protected>} />
-        <Route path="/app/profile" element={<Protected><Profile /></Protected>} />
+        <Route path="/app" element={<Protected><AppLayout /></Protected>}>
+          <Route index element={<Dashboard />} />
+          <Route path="marketplace" element={<Marketplace />} />
+          <Route path="my-books" element={<MyBooks />} />
+          <Route path="requests" element={<BorrowRequests />} />
+          <Route path="profile" element={<Profile />} />
+        </Route>
       </Routes>
     </AuthProvider>
   )

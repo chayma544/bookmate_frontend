@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react'
 import BookCard from '../components/BookCard'
 import Modal from '../components/Modal'
 import Button from '../components/Button'
+import PageHeader from '../components/PageHeader'
 import { useAuth } from '../context/AuthContext'
 import bookService from '../services/bookService'
 import requestService from '../services/requestService'
@@ -119,19 +120,33 @@ export default function Marketplace() {
   }
 
   return (
-    <div className="p-6 text-ink">
-      <h2 className="mb-4 text-2xl font-semibold font-serif">Marketplace</h2>
-      {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
-      {notice && <p className="mb-4 text-sm text-green-700">{notice}</p>}
-      {books.length === 0 && !error ? (
-        <p className="text-sm text-[#6b5744]">No books available right now.</p>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {books.map((book) => (
-            <BookCard key={book.id} book={book} onBorrow={handleBorrow} onSwap={() => setSwapTarget(book)} />
-          ))}
+    <div className="p-7 text-ink" style={{ background: '#e1dac9', minHeight: '100%' }}>
+      <PageHeader title="Browse Books" subtitle="Discover what the community is lending and swapping" />
+
+      {error && <p className="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600 border border-red-100">{error}</p>}
+      {notice && <p className="mb-4 rounded-lg bg-emerald-50 px-4 py-2 text-sm text-emerald-700 border border-emerald-100">{notice}</p>}
+
+      <div className="bg-white rounded-xl border border-[#e2ddd4] overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-[#e2ddd4]">
+          <span className="text-sm font-semibold text-[#1e1810]">Available books</span>
+          <span className="text-xs text-[#6b5744]">{books.length} book{books.length !== 1 ? 's' : ''}</span>
         </div>
-      )}
+        {books.length === 0 && !error ? (
+          <div className="py-14 text-center">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#f5ede0] text-xl">📚</div>
+            <p className="text-sm text-[#6b5744]">No books available right now.</p>
+            <p className="text-xs text-[#9d7c5e] mt-1">Check back soon, or add your own from the Dashboard.</p>
+          </div>
+        ) : (
+          <div className="p-4">
+            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+              {books.map((book) => (
+                <BookCard key={book.id} book={book} onBorrow={handleBorrow} onSwap={() => setSwapTarget(book)} />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
 
       {swapTarget && (
         <SwapModal

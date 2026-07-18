@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../context/AuthContext'
-import AppLayout from '../layouts/AppLayout'
 import Modal from '../components/Modal'
 import Button from '../components/Button'
 import BookCard from '../components/BookCard'
@@ -31,12 +30,20 @@ function findActiveRequestForBook(requests, bookId) {
 const EMPTY_FORM = { title: '', author: '', genre: '', imageUrl: '' }
 
 // ─── sub-components ───────────────────────────────────────────────────────────
-function StatCard({ label, value, sub, subColor }) {
+function StatCard({ label, value, sub, subColor, icon, accent }) {
   return (
-    <div className="bg-white rounded-xl border border-[#e2ddd4] px-5 py-4 flex-1">
-      <p className="text-xs text-[#6b5744] mb-1">{label}</p>
-      <p className="text-2xl font-semibold text-[#1e1810]">{value}</p>
-      {sub && <p className="text-xs mt-1" style={{ color: subColor || '#9d7c5e' }}>{sub}</p>}
+    <div className="group bg-white rounded-xl border border-[#e2ddd4] px-5 py-4 flex-1 flex items-start gap-4 transition-shadow hover:shadow-[0_8px_20px_rgba(139,58,15,0.08)]">
+      <div
+        className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg text-lg"
+        style={{ background: `${accent}1a`, color: accent }}
+      >
+        {icon}
+      </div>
+      <div className="min-w-0">
+        <p className="text-xs text-[#6b5744] mb-1">{label}</p>
+        <p className="text-2xl font-semibold text-[#1e1810]">{value}</p>
+        {sub && <p className="text-xs mt-1" style={{ color: subColor || '#9d7c5e' }}>{sub}</p>}
+      </div>
     </div>
   )
 }
@@ -252,7 +259,7 @@ export default function Dashboard() {
   ).length
 
   return (
-    <AppLayout>
+    <>
       <div className="p-7" style={{ background: '#e1dac9', minHeight: '100%' }}>
 
         {/* top bar */}
@@ -270,14 +277,6 @@ export default function Dashboard() {
             />
             <Button variant="primary" onClick={() => setModal('add')}>+ Add book</Button>
           </div>
-        </div>
-
-        {/* stat cards */}
-        <div className="flex gap-3 mb-6">
-          <StatCard label="Total books owned" value={owned}    sub={`${owned} in library`} />
-          <StatCard label="Books lent"        value={lent}     sub={lent ? `${lent} currently out` : 'None out'}   subColor="#d97706" />
-          <StatCard label="Books borrowed"    value={borrowed} sub={borrowed ? 'Return soon' : 'None borrowed'}     subColor="#2563eb" />
-          <StatCard label="Swap offers"       value={swaps}    sub={swaps ? `${swaps} active` : 'None active'}      subColor="#059669" />
         </div>
 
         {/* books cards */}
@@ -386,6 +385,6 @@ export default function Dashboard() {
       <Modal isOpen={!!modal?.book} onClose={() => setModal(null)} title="Edit book">
         <BookForm initial={modal?.book} onSubmit={editBook} onClose={() => setModal(null)} />
       </Modal>
-    </AppLayout>
+    </>
   )
 }

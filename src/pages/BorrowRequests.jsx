@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { useAuth } from '../context/AuthContext'
 import requestService from '../services/requestService'
+import PageHeader from '../components/PageHeader'
 import { timeAgo, timeUntil, formatDate } from '../utils/time'
 
 function errorMessage(err, fallback) {
@@ -109,35 +110,45 @@ export default function BorrowRequests() {
   const handleReturn = (req) => act(() => requestService.returnBook(req.id, token), req.id)
 
   return (
-    <div className="p-6 text-ink">
-      <h2 className="mb-4 text-2xl font-semibold font-serif">Borrow Requests</h2>
-      {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
+    <div className="p-7 text-ink" style={{ background: '#e1dac9', minHeight: '100%' }}>
+      <PageHeader title="Borrow Requests" subtitle="Track what's coming in and what you've asked for" />
+      {error && <p className="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600 border border-red-100">{error}</p>}
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <section>
-          <h3 className="mb-3 text-sm font-semibold text-[#1e1810]">Incoming — people want your books</h3>
-          {incoming.length === 0 ? (
-            <p className="text-sm text-[#6b5744]">No incoming requests.</p>
-          ) : (
-            <div className="space-y-3">
-              {incoming.map((req) => (
-                <RequestCard key={req.id} req={req} perspective="incoming" onAccept={handleAccept} onDecline={handleDecline} onReturn={handleReturn} busy={busyId === req.id} />
-              ))}
-            </div>
-          )}
+      <div className="grid gap-5 lg:grid-cols-2">
+        <section className="bg-white rounded-xl border border-[#e2ddd4] overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-[#e2ddd4]">
+            <span className="text-sm font-semibold text-[#1e1810]">Incoming</span>
+            <span className="text-xs text-[#6b5744]">people want your books</span>
+          </div>
+          <div className="p-4">
+            {incoming.length === 0 ? (
+              <p className="py-6 text-center text-sm text-[#6b5744]">No incoming requests.</p>
+            ) : (
+              <div className="space-y-3">
+                {incoming.map((req) => (
+                  <RequestCard key={req.id} req={req} perspective="incoming" onAccept={handleAccept} onDecline={handleDecline} onReturn={handleReturn} busy={busyId === req.id} />
+                ))}
+              </div>
+            )}
+          </div>
         </section>
 
-        <section>
-          <h3 className="mb-3 text-sm font-semibold text-[#1e1810]">Outgoing — your requests to others</h3>
-          {outgoing.length === 0 ? (
-            <p className="text-sm text-[#6b5744]">You haven't requested any books yet.</p>
-          ) : (
-            <div className="space-y-3">
-              {outgoing.map((req) => (
-                <RequestCard key={req.id} req={req} perspective="outgoing" onAccept={handleAccept} onDecline={handleDecline} onReturn={handleReturn} busy={busyId === req.id} />
-              ))}
-            </div>
-          )}
+        <section className="bg-white rounded-xl border border-[#e2ddd4] overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-[#e2ddd4]">
+            <span className="text-sm font-semibold text-[#1e1810]">Outgoing</span>
+            <span className="text-xs text-[#6b5744]">your requests to others</span>
+          </div>
+          <div className="p-4">
+            {outgoing.length === 0 ? (
+              <p className="py-6 text-center text-sm text-[#6b5744]">You haven't requested any books yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {outgoing.map((req) => (
+                  <RequestCard key={req.id} req={req} perspective="outgoing" onAccept={handleAccept} onDecline={handleDecline} onReturn={handleReturn} busy={busyId === req.id} />
+                ))}
+              </div>
+            )}
+          </div>
         </section>
       </div>
     </div>
