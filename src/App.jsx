@@ -9,12 +9,21 @@ import MyBooks from './pages/MyBooks'
 import BorrowRequests from './pages/BorrowRequests'
 import Profile from './pages/Profile'
 import BookDetail from './pages/BookDetail'
+import AdminUsers from './pages/AdminUsers'
 import AppLayout from './layouts/AppLayout'
+import Loading from './components/Loading'
 import { AuthProvider, useAuth } from './context/AuthContext'
 
 function Protected({ children }) {
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
+  if (loading) return <Loading />
   if (!user) return <Navigate to="/login" replace />
+  return children
+}
+
+function AdminProtected({ children }) {
+  const { isAdmin } = useAuth()
+  if (!isAdmin) return <Navigate to="/app" replace />
   return children
 }
 
@@ -33,6 +42,7 @@ export default function App() {
           <Route path="books/:id" element={<BookDetail />} />
           <Route path="requests" element={<BorrowRequests />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="admin/users" element={<AdminProtected><AdminUsers /></AdminProtected>} />
         </Route>
       </Routes>
     </AuthProvider>

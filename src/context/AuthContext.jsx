@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import authService from '../services/authService'
+import { ADMIN_EMAIL } from '../utils/constants'
 
 const AuthContext = createContext()
 
@@ -48,8 +49,10 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('token')
   }
 
+  const isAdmin = user?.email === ADMIN_EMAIL
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, logout, isAdmin }}>
       {children}
     </AuthContext.Provider>
   )

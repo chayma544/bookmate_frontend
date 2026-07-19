@@ -42,9 +42,21 @@ const NAV = [
   },
 ]
 
+const ADMIN_NAV = {
+  to: '/app/admin/users',
+  label: 'Users',
+  icon: (
+    <>
+      <circle cx="9" cy="8" r="3" />
+      <path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 8.5a3 3 0 1 1 3.5 2.95M18 14.5a5 5 0 0 1 3.5 4.77" />
+    </>
+  ),
+}
+
 export default function Sidebar() {
-  const { user, logout } = useAuth()
+  const { user, logout, isAdmin } = useAuth()
   const navigate = useNavigate()
+  const navItems = isAdmin ? [...NAV, ADMIN_NAV] : NAV
 
   const handleLogout = () => {
     logout()
@@ -72,7 +84,7 @@ export default function Sidebar() {
       </div>
 
       <nav className="flex-1 px-3 py-2 space-y-1">
-        {NAV.map(({ to, label, icon }) => (
+        {navItems.map(({ to, label, icon }) => (
           <NavLink
             key={to}
             to={to}
