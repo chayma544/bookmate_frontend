@@ -8,6 +8,7 @@ import Marketplace from './pages/Marketplace'
 import MyBooks from './pages/MyBooks'
 import BorrowRequests from './pages/BorrowRequests'
 import Profile from './pages/Profile'
+import BookDetail from './pages/BookDetail'
 import AppLayout from './layouts/AppLayout'
 import { AuthProvider, useAuth } from './context/AuthContext'
 
@@ -29,6 +30,7 @@ export default function App() {
           <Route index element={<Dashboard />} />
           <Route path="marketplace" element={<Marketplace />} />
           <Route path="my-books" element={<MyBooks />} />
+          <Route path="books/:id" element={<BookDetail />} />
           <Route path="requests" element={<BorrowRequests />} />
           <Route path="profile" element={<Profile />} />
         </Route>

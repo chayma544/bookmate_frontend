@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext'
 const NAV = [
   {
     to: '/app',
-    label: 'Dashboard',
+    label: 'Overview',
     icon: (
       <path d="M3 10.5 12 4l9 6.5M5 9.5V19a1 1 0 0 0 1 1h4v-5.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V20h4a1 1 0 0 0 1-1V9.5" />
     ),
