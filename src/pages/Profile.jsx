@@ -45,7 +45,6 @@ export default function Profile() {
             <InfoRow label="First name" value={user.firstName} />
             <InfoRow label="Last name" value={user.lastName} />
             <InfoRow label="Email" value={user.email} />
-            <InfoRow label="User ID" value={user.id} />
           </div>
         </div>
       )}
