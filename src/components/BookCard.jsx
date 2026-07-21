@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { formatDate, isPast } from '../utils/time'
+import RatingStars from './RatingStars'
 
 const STATUS_STYLES = {
   available: 'bg-[#e8ddd0] text-[#1a1008]',
@@ -22,6 +23,11 @@ export default function BookCard({ book, onBorrow, onSwap, onEdit, onDelete, onR
   }[status] || 'Available'
 
   const overdue = dueDate && isPast(dueDate)
+
+  const ratingValues = Array.isArray(book.ratings) ? book.ratings.map((r) => r.value) : null
+  const ratingAverage = ratingValues && ratingValues.length
+    ? ratingValues.reduce((sum, v) => sum + v, 0) / ratingValues.length
+    : null
 
   return (
     <div className="group overflow-hidden rounded-2xl border border-[#e2ddd4] bg-white shadow-[0_8px_20px_rgba(139,58,15,0.05)] transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_30px_rgba(139,58,15,0.08)]">
@@ -49,6 +55,11 @@ export default function BookCard({ book, onBorrow, onSwap, onEdit, onDelete, onR
             <h3 className="text-sm font-semibold text-[#1e1810] line-clamp-2 group-hover:text-[#8B3A0F] transition-colors">{book.title}</h3>
             <p className="mt-1 text-xs text-[#6b5744]">{book.author}</p>
             <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-[#9d7c5e]">{book.genre || book.category || 'General'}</p>
+            {ratingValues && ratingValues.length > 0 && (
+              <div className="mt-1">
+                <RatingStars value={ratingAverage || 0} count={ratingValues.length} readOnly size="sm" />
+              </div>
+            )}
           </div>
         </div>
       </Link>

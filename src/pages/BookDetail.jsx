@@ -4,8 +4,10 @@ import { useAuth } from '../context/AuthContext'
 import bookService from '../services/bookService'
 import requestService from '../services/requestService'
 import wikipediaService from '../services/wikipediaService'
+import ratingService from '../services/ratingService'
 import SwapModal from '../components/SwapModal'
 import Button from '../components/Button'
+import RatingStars from '../components/RatingStars'
 
 function errorMessage(err, fallback) {
   return err?.response?.data?.message || err?.message || fallback
@@ -81,6 +83,34 @@ function WikiSection({ status, summary }) {
   )
 }
 
+function RatingSection({ average, count, myRating, rateValue, rateComment, rateBusy, rateError, rateNotice, onRateChange, onCommentChange, onSubmit }) {
+  return (
+    <div className="bg-white rounded-xl border border-[#e2ddd4] overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-[#e2ddd4]">
+        <span className="text-sm font-semibold text-[#1e1810]">Ratings</span>
+        <RatingStars value={average || 0} count={count} readOnly />
+      </div>
+
+      <div className="p-5 space-y-3">
+        <p className="text-xs text-[#9d7c5e]">{myRating ? 'Update your rating' : 'Rate this book'}</p>
+        <RatingStars value={rateValue} onChange={onRateChange} />
+        <textarea
+          value={rateComment}
+          onChange={(e) => onCommentChange(e.target.value)}
+          placeholder="Add an optional comment…"
+          rows={3}
+          className="w-full rounded-lg border border-[#e2ddd4] px-3 py-2 text-sm text-[#3a2e22] focus:outline-none focus:ring-2 focus:ring-[#8B3A0F]/20"
+        />
+        {rateError && <p className="text-sm text-red-600">{rateError}</p>}
+        {rateNotice && <p className="text-sm text-emerald-700">{rateNotice}</p>}
+        <Button variant="primary" onClick={onSubmit} disabled={rateBusy || !rateValue}>
+          {rateBusy ? 'Publishing…' : myRating ? 'Update rating' : 'Publish rating'}
+        </Button>
+      </div>
+    </div>
+  )
+}
+
 export default function BookDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -98,6 +128,13 @@ export default function BookDetail() {
   const [actionError, setActionError] = useState('')
   const [notice, setNotice] = useState('')
   const [busy, setBusy] = useState(false)
+
+  const [ratingsData, setRatingsData] = useState({ average: null, count: 0, myRating: null })
+  const [rateValue, setRateValue] = useState(0)
+  const [rateComment, setRateComment] = useState('')
+  const [rateBusy, setRateBusy] = useState(false)
+  const [rateError, setRateError] = useState('')
+  const [rateNotice, setRateNotice] = useState('')
 
   const loadBook = useCallback(async () => {
     setLoading(true)
@@ -138,6 +175,34 @@ export default function BookDetail() {
       .then((all) => setMyBooks(all.filter(b => b.status === 'AVAILABLE' && b.ownerId === user.id)))
       .catch(() => {})
   }, [user, token])
+
+  useEffect(() => {
+    if (!book || !token) return
+    ratingService.getForBook(book.id, token)
+      .then((data) => {
+        setRatingsData(data)
+        if (data.myRating) {
+          setRateValue(data.myRating.value)
+          setRateComment(data.myRating.comment || '')
+        }
+      })
+      .catch(() => {})
+  }, [book, token])
+
+  const handleRateSubmit = async () => {
+    setRateBusy(true)
+    setRateError('')
+    setRateNotice('')
+    try {
+      const data = await ratingService.rate(book.id, { value: rateValue, comment: rateComment }, token)
+      setRatingsData(data)
+      setRateNotice('Rating published.')
+    } catch (err) {
+      setRateError(errorMessage(err, 'Failed to publish rating.'))
+    } finally {
+      setRateBusy(false)
+    }
+  }
 
   const handleBorrow = async () => {
     setBusy(true)
@@ -253,6 +318,20 @@ export default function BookDetail() {
               </p>
             )}
           </div>
+
+          <RatingSection
+            average={ratingsData.average}
+            count={ratingsData.count}
+            myRating={ratingsData.myRating}
+            rateValue={rateValue}
+            rateComment={rateComment}
+            rateBusy={rateBusy}
+            rateError={rateError}
+            rateNotice={rateNotice}
+            onRateChange={setRateValue}
+            onCommentChange={setRateComment}
+            onSubmit={handleRateSubmit}
+          />
 
           <WikiSection status={wikiStatus} summary={wikiSummary} />
         </div>
