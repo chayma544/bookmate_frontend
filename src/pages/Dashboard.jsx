@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import Modal from '../components/Modal'
 import Button from '../components/Button'
 import BookCard from '../components/BookCard'
+import BookForm from '../components/BookForm'
 import bookService from '../services/bookService'
 import requestService from '../services/requestService'
 import { timeAgo } from '../utils/time'
@@ -25,128 +27,6 @@ function fromBackend(book) {
 
 function findActiveRequestForBook(requests, bookId) {
   return requests.find(r => r.status === 'APPROVED' && !r.returnedAt && (r.bookId === bookId || r.offeredBookId === bookId))
-}
-
-const EMPTY_FORM = { title: '', author: '', genre: '', imageUrl: '' }
-
-// ─── sub-components ───────────────────────────────────────────────────────────
-function BookForm({ initial, onSubmit, onClose }) {
-  const [form, setForm] = useState(initial || EMPTY_FORM)
-  const [uploading, setUploading] = useState(false)
-  const [uploadError, setUploadError] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [saveError, setSaveError] = useState('')
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
-
-  const submit = async () => {
-    if (!form.title || !form.author || uploading || saving) return
-    setSaving(true)
-    setSaveError('')
-    try {
-      await onSubmit(form)
-    } catch (error) {
-      setSaveError(errorMessage(error, 'Failed to save book.'))
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const inputClass = "w-full px-3 py-2 rounded-lg border border-[#e2ddd4] bg-[#f5ede0] text-[#1e1810] text-sm focus:outline-none focus:border-[#8B3A0F]"
-
-  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
-  const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
-
-  const uploadToCloudinary = async (file) => {
-    setUploading(true)
-    setUploadError('')
-
-    try {
-      if (!cloudName || !uploadPreset) {
-        throw new Error('Set VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET in your frontend env file.')
-      }
-
-      const payload = new FormData()
-      payload.append('file', file)
-      payload.append('upload_preset', uploadPreset)
-
-      const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-        method: 'POST',
-        body: payload,
-      })
-
-      if (!response.ok) {
-        throw new Error('Cloudinary upload failed. Check your preset and cloud name.')
-      }
-
-      const data = await response.json()
-      set('imageUrl', data.secure_url)
-    } catch (error) {
-      setUploadError(error?.message || 'Image upload failed.')
-    } finally {
-      setUploading(false)
-    }
-  }
-
-  const handleFileChange = (event) => {
-    const file = event.target.files?.[0]
-    if (file) uploadToCloudinary(file)
-  }
-
-  return (
-    <div>
-      <div className="space-y-3 mb-5">
-        {[['Title','title','e.g. The Alchemist'],['Author','author','e.g. Paulo Coelho'],['Genre','genre','e.g. Fiction']].map(([label,key,ph]) => (
-          <div key={key}>
-            <label className="block text-xs text-[#6b5744] mb-1">{label}</label>
-            <input className={inputClass} value={form[key]} onChange={e => set(key, e.target.value)} placeholder={ph} />
-          </div>
-        ))}
-        <div>
-          <label className="block text-xs text-[#6b5744] mb-1">Cover image URL</label>
-          <input
-            className={inputClass}
-            value={form.imageUrl}
-            onChange={e => set('imageUrl', e.target.value)}
-            placeholder="Paste any direct image URL or a Cloudinary URL"
-          />
-          <p className="mt-1 text-[11px] text-[#9d7c5e]">
-            You can paste an image link from any source, or upload a file to Cloudinary below.
-          </p>
-        </div>
-        <div>
-          <label className="block text-xs text-[#6b5744] mb-1">Upload image file</label>
-          <input
-            className="w-full text-sm text-[#6b5744] file:mr-4 file:rounded-full file:border-0 file:bg-[#8B3A0F] file:px-4 file:py-2 file:text-white hover:file:bg-[#7a3010]"
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            disabled={uploading}
-          />
-          <p className="mt-1 text-[11px] text-[#9d7c5e]">
-            {uploading ? 'Uploading to Cloudinary...' : 'Unsigned upload requires your Cloudinary cloud name and upload preset.'}
-          </p>
-          {uploadError && <p className="mt-1 text-[11px] text-red-600">{uploadError}</p>}
-          {form.imageUrl && (
-            <div className="mt-3 overflow-hidden rounded-xl border border-[#e2ddd4] bg-[#fdf8f3]">
-              <img src={form.imageUrl} alt="Cover preview" className="h-40 w-full object-cover" />
-            </div>
-          )}
-        </div>
-        {initial && (
-          <p className="text-[11px] text-[#9d7c5e]">
-            Status is managed automatically as borrow and swap requests are approved or returned — it isn't set manually.
-          </p>
-        )}
-      </div>
-      {saveError && <p className="mb-3 text-[11px] text-red-600">{saveError}</p>}
-      <div className="flex justify-end gap-2">
-        <Button variant="secondary" onClick={onClose}>Cancel</Button>
-        <Button variant="primary" onClick={submit} disabled={uploading || saving}>
-          {saving ? 'Saving…' : initial ? 'Save changes' : 'Add book'}
-        </Button>
-      </div>
-    </div>
-  )
 }
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
@@ -180,17 +60,6 @@ export default function Dashboard() {
     b.title.toLowerCase().includes(search.toLowerCase()) ||
     b.author.toLowerCase().includes(search.toLowerCase())
   )
-
-  const addBook = async (form) => {
-    await bookService.create({
-      title: form.title,
-      author: form.author,
-      category: form.genre,
-      image: form.imageUrl,
-    }, token)
-    await loadAll()
-    setModal(null)
-  }
 
   const editBook = async (form) => {
     await bookService.update(modal.book.id, {
@@ -246,7 +115,9 @@ export default function Dashboard() {
               placeholder="Search books or authors…"
               className="px-4 py-2 rounded-full border border-[#e2ddd4] bg-white text-sm text-[#1e1810] focus:outline-none focus:border-[#8B3A0F] w-52"
             />
-            <Button variant="primary" onClick={() => setModal('add')}>+ Add book</Button>
+            <Link to="/app/books/new">
+              <Button variant="primary">+ Add book</Button>
+            </Link>
           </div>
         </div>
 
@@ -350,11 +221,8 @@ export default function Dashboard() {
       </div>
 
       {/* modals */}
-      <Modal isOpen={modal === 'add'} onClose={() => setModal(null)} title="Add a book">
-        <BookForm onSubmit={addBook} onClose={() => setModal(null)} />
-      </Modal>
       <Modal isOpen={!!modal?.book} onClose={() => setModal(null)} title="Edit book">
-        <BookForm initial={modal?.book} onSubmit={editBook} onClose={() => setModal(null)} />
+        <BookForm initial={modal?.book} onSubmit={editBook} onCancel={() => setModal(null)} submitLabel="Save changes" />
       </Modal>
     </>
   )

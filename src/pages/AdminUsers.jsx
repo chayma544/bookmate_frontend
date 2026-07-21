@@ -1,66 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import PageHeader from '../components/PageHeader'
-import Modal from '../components/Modal'
 import Button from '../components/Button'
 import userService from '../services/userService'
 
 function errorMessage(err, fallback) {
   return err?.response?.data?.message || err?.message || fallback
-}
-
-const EMPTY_FORM = { firstName: '', lastName: '', email: '', password: '' }
-
-function AddUserModal({ onClose, onSubmit }) {
-  const [form, setForm] = useState(EMPTY_FORM)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
-
-  const submit = async () => {
-    if (!form.firstName || !form.lastName || !form.email || !form.password) return
-    setSaving(true)
-    setError('')
-    try {
-      await onSubmit(form)
-    } catch (err) {
-      setError(errorMessage(err, 'Failed to add user.'))
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const inputClass = "w-full px-3 py-2 rounded-lg border border-[#e2ddd4] bg-[#f5ede0] text-[#1e1810] text-sm focus:outline-none focus:border-[#8B3A0F]"
-
-  return (
-    <Modal isOpen onClose={onClose} title="Add a user">
-      <div className="space-y-3 mb-5">
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-xs text-[#6b5744] mb-1">First name</label>
-            <input className={inputClass} value={form.firstName} onChange={e => set('firstName', e.target.value)} placeholder="Jane" />
-          </div>
-          <div>
-            <label className="block text-xs text-[#6b5744] mb-1">Last name</label>
-            <input className={inputClass} value={form.lastName} onChange={e => set('lastName', e.target.value)} placeholder="Doe" />
-          </div>
-        </div>
-        <div>
-          <label className="block text-xs text-[#6b5744] mb-1">Email</label>
-          <input type="email" className={inputClass} value={form.email} onChange={e => set('email', e.target.value)} placeholder="jane@example.com" />
-        </div>
-        <div>
-          <label className="block text-xs text-[#6b5744] mb-1">Temporary password</label>
-          <input type="password" className={inputClass} value={form.password} onChange={e => set('password', e.target.value)} placeholder="At least 8 characters" />
-        </div>
-      </div>
-      {error && <p className="mb-3 text-[11px] text-red-600">{error}</p>}
-      <div className="flex justify-end gap-2">
-        <Button variant="secondary" onClick={onClose}>Cancel</Button>
-        <Button variant="primary" onClick={submit} disabled={saving}>{saving ? 'Adding…' : 'Add user'}</Button>
-      </div>
-    </Modal>
-  )
 }
 
 export default function AdminUsers() {
@@ -69,7 +15,6 @@ export default function AdminUsers() {
   const [loadError, setLoadError] = useState('')
   const [actionError, setActionError] = useState('')
   const [notice, setNotice] = useState('')
-  const [showAdd, setShowAdd] = useState(false)
   const [busyId, setBusyId] = useState(null)
 
   const loadUsers = useCallback(async () => {
@@ -83,13 +28,6 @@ export default function AdminUsers() {
   }, [token])
 
   useEffect(() => { loadUsers() }, [loadUsers])
-
-  const addUser = async (form) => {
-    await userService.create(form, token)
-    await loadUsers()
-    setShowAdd(false)
-    setNotice('User added.')
-  }
 
   const toggleArchived = async (u) => {
     setBusyId(u.id)
@@ -110,7 +48,7 @@ export default function AdminUsers() {
       <PageHeader
         title="Manage Users"
         subtitle="Everyone with a BookMate account"
-        action={<Button variant="primary" onClick={() => setShowAdd(true)}>+ Add user</Button>}
+        action={<Link to="/app/admin/users/new"><Button variant="primary">+ Add user</Button></Link>}
       />
 
       {loadError && <p className="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600 border border-red-100">{loadError}</p>}
@@ -147,9 +85,13 @@ export default function AdminUsers() {
                   <tr key={u.id} className="border-b border-[#f0ebe1] last:border-0">
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#f5ede0] text-xs font-semibold text-[#8B3A0F]">
-                          {initials || 'U'}
-                        </div>
+                        {u.profileImage ? (
+                          <img src={u.profileImage} alt="" className="h-8 w-8 flex-shrink-0 rounded-full object-cover" />
+                        ) : (
+                          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#f5ede0] text-xs font-semibold text-[#8B3A0F]">
+                            {initials || 'U'}
+                          </div>
+                        )}
                         <span className="font-medium text-[#1e1810]">
                           {u.firstName} {u.lastName}{isSelf ? ' (you)' : ''}
                         </span>
@@ -187,8 +129,6 @@ export default function AdminUsers() {
           </table>
         )}
       </div>
-
-      {showAdd && <AddUserModal onClose={() => setShowAdd(false)} onSubmit={addUser} />}
     </div>
   )
 }

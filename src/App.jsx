@@ -8,8 +8,11 @@ import Marketplace from './pages/Marketplace'
 import MyBooks from './pages/MyBooks'
 import BorrowRequests from './pages/BorrowRequests'
 import Profile from './pages/Profile'
+import AddBook from './pages/AddBook'
 import BookDetail from './pages/BookDetail'
 import AdminUsers from './pages/AdminUsers'
+import AddUser from './pages/AddUser'
+import AdminReports from './pages/AdminReports'
 import AppLayout from './layouts/AppLayout'
 import Loading from './components/Loading'
 import { AuthProvider, useAuth } from './context/AuthContext'
@@ -39,10 +42,13 @@ export default function App() {
           <Route index element={<Dashboard />} />
           <Route path="marketplace" element={<Marketplace />} />
           <Route path="my-books" element={<MyBooks />} />
+          <Route path="books/new" element={<AddBook />} />
           <Route path="books/:id" element={<BookDetail />} />
           <Route path="requests" element={<BorrowRequests />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="admin/users/new" element={<AdminProtected><AddUser /></AdminProtected>} />
           <Route path="admin/users" element={<AdminProtected><AdminUsers /></AdminProtected>} />
+          <Route path="admin/reports" element={<AdminProtected><AdminReports /></AdminProtected>} />
         </Route>
       </Routes>
     </AuthProvider>

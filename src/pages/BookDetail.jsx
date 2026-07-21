@@ -5,6 +5,7 @@ import bookService from '../services/bookService'
 import requestService from '../services/requestService'
 import wikipediaService from '../services/wikipediaService'
 import ratingService from '../services/ratingService'
+import reportService from '../services/reportService'
 import SwapModal from '../components/SwapModal'
 import Button from '../components/Button'
 import RatingStars from '../components/RatingStars'
@@ -136,6 +137,12 @@ export default function BookDetail() {
   const [rateError, setRateError] = useState('')
   const [rateNotice, setRateNotice] = useState('')
 
+  const [reportOpen, setReportOpen] = useState(false)
+  const [reportComment, setReportComment] = useState('')
+  const [reportBusy, setReportBusy] = useState(false)
+  const [reportError, setReportError] = useState('')
+  const [reportNotice, setReportNotice] = useState('')
+
   const loadBook = useCallback(async () => {
     setLoading(true)
     setLoadError('')
@@ -218,6 +225,23 @@ export default function BookDetail() {
     }
   }
 
+  const handleReportSubmit = async () => {
+    if (!reportComment.trim()) return
+    setReportBusy(true)
+    setReportError('')
+    setReportNotice('')
+    try {
+      await reportService.create({ reportedUserId: book.ownerId, bookId: book.id, comment: reportComment }, token)
+      setReportNotice('Report sent to our team.')
+      setReportComment('')
+      setReportOpen(false)
+    } catch (err) {
+      setReportError(errorMessage(err, 'Failed to send report.'))
+    } finally {
+      setReportBusy(false)
+    }
+  }
+
   const handleSwapSubmit = async ({ offeredBookId, swapMode }) => {
     await requestService.create({ bookId: book.id, type: 'SWAP', offeredBookId, swapMode }, token)
     setSwapOpen(false)
@@ -288,7 +312,37 @@ export default function BookDetail() {
             {ownerName && (
               <p className="mt-3 text-xs text-[#9d7c5e]">
                 Owned by <span className="font-medium text-[#6b5744]">{isOwner ? 'you' : ownerName}</span>
+                {!isOwner && (
+                  <>
+                    {' · '}
+                    <button type="button" onClick={() => setReportOpen((o) => !o)} className="font-medium text-red-600 hover:underline">
+                      Report this user
+                    </button>
+                  </>
+                )}
               </p>
+            )}
+
+            {!isOwner && reportOpen && (
+              <div className="mt-3 rounded-lg border border-[#e2ddd4] bg-[#fdf8f3] p-3 space-y-2">
+                <textarea
+                  value={reportComment}
+                  onChange={(e) => setReportComment(e.target.value)}
+                  placeholder="Describe the issue with this user…"
+                  rows={3}
+                  className="w-full rounded-lg border border-[#e2ddd4] px-3 py-2 text-sm text-[#3a2e22] focus:outline-none focus:ring-2 focus:ring-[#8B3A0F]/20"
+                />
+                {reportError && <p className="text-sm text-red-600">{reportError}</p>}
+                <div className="flex justify-end gap-2">
+                  <Button variant="secondary" onClick={() => setReportOpen(false)}>Cancel</Button>
+                  <Button variant="primary" onClick={handleReportSubmit} disabled={reportBusy || !reportComment.trim()}>
+                    {reportBusy ? 'Sending…' : 'Send report'}
+                  </Button>
+                </div>
+              </div>
+            )}
+            {!isOwner && reportNotice && (
+              <p className="mt-2 text-xs text-emerald-700">{reportNotice}</p>
             )}
 
             {book.description && (

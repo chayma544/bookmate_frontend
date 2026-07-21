@@ -1,5 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { ADMIN_EMAIL } from '../utils/constants'
 
 export default function Landing() {
   return (
@@ -93,6 +94,15 @@ export default function Landing() {
           </div>
         </section>
       </main>
+
+      <footer className="border-t border-[#efe0cf]">
+        <div className="container mx-auto px-6 py-8 text-sm text-[#6b5744]">
+          Contact us:{' '}
+          <a href={`mailto:${ADMIN_EMAIL}`} className="font-medium text-primary hover:underline">
+            {ADMIN_EMAIL}
+          </a>
+        </div>
+      </footer>
     </div>
   )
 }
