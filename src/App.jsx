@@ -12,10 +12,13 @@ import AddBook from './pages/AddBook'
 import BookDetail from './pages/BookDetail'
 import AdminUsers from './pages/AdminUsers'
 import AddUser from './pages/AddUser'
+import EditUser from './pages/EditUser'
 import AdminReports from './pages/AdminReports'
+import UserProfile from './pages/UserProfile'
 import AppLayout from './layouts/AppLayout'
 import Loading from './components/Loading'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { ChatProvider } from './context/ChatContext'
 
 function Protected({ children }) {
   const { user, loading } = useAuth()
@@ -38,7 +41,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        <Route path="/app" element={<Protected><AppLayout /></Protected>}>
+        <Route path="/app" element={<Protected><ChatProvider><AppLayout /></ChatProvider></Protected>}>
           <Route index element={<Dashboard />} />
           <Route path="marketplace" element={<Marketplace />} />
           <Route path="my-books" element={<MyBooks />} />
@@ -46,7 +49,9 @@ export default function App() {
           <Route path="books/:id" element={<BookDetail />} />
           <Route path="requests" element={<BorrowRequests />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="users/:id" element={<UserProfile />} />
           <Route path="admin/users/new" element={<AdminProtected><AddUser /></AdminProtected>} />
+          <Route path="admin/users/:id/edit" element={<AdminProtected><EditUser /></AdminProtected>} />
           <Route path="admin/users" element={<AdminProtected><AdminUsers /></AdminProtected>} />
           <Route path="admin/reports" element={<AdminProtected><AdminReports /></AdminProtected>} />
         </Route>

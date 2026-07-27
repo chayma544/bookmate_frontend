@@ -105,22 +105,30 @@ export default function AdminUsers() {
                       </span>
                     </td>
                     <td className="px-5 py-3 text-right">
-                      {isSelf ? (
-                        <span className="text-xs text-[#9d7c5e]">—</span>
-                      ) : (
-                        <button
-                          type="button"
-                          disabled={busyId === u.id}
-                          onClick={() => toggleArchived(u)}
-                          className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors disabled:opacity-60 ${
-                            u.archived
-                              ? 'border-emerald-200 text-emerald-700 hover:bg-emerald-50'
-                              : 'border-[#e2ddd4] text-[#6b5744] hover:border-red-200 hover:bg-red-50 hover:text-red-600'
-                          }`}
+                      <div className="flex items-center justify-end gap-2">
+                        <Link
+                          to={`/app/admin/users/${u.id}/edit`}
+                          className="rounded-full border border-[#e2ddd4] px-3 py-1 text-xs font-medium text-[#6b5744] transition-colors hover:border-[#8B3A0F] hover:bg-[#f5ede0] hover:text-[#8B3A0F]"
                         >
-                          {busyId === u.id ? 'Working…' : u.archived ? 'Unarchive' : 'Archive'}
-                        </button>
-                      )}
+                          Edit
+                        </Link>
+                        {isSelf ? (
+                          <span className="text-xs text-[#9d7c5e]">—</span>
+                        ) : (
+                          <button
+                            type="button"
+                            disabled={busyId === u.id}
+                            onClick={() => toggleArchived(u)}
+                            className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors disabled:opacity-60 ${
+                              u.archived
+                                ? 'border-emerald-200 text-emerald-700 hover:bg-emerald-50'
+                                : 'border-[#e2ddd4] text-[#6b5744] hover:border-red-200 hover:bg-red-50 hover:text-red-600'
+                            }`}
+                          >
+                            {busyId === u.id ? 'Working…' : u.archived ? 'Unarchive' : 'Archive'}
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 )
