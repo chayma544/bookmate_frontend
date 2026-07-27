@@ -23,4 +23,12 @@ export default {
     const res = await axios.put(`${API}/users/${id}`, { archived }, { headers: { Authorization: `Bearer ${token}` } })
     return res.data
   },
+  getConnections: async (id, token) => {
+    const res = await axios.get(`${API}/users/${id}/connections`, { headers: { Authorization: `Bearer ${token}` } })
+    return res.data
+  },
+  updateMe: async (patch, token) => {
+    const res = await axios.put(`${API}/users/me`, patch, { headers: { Authorization: `Bearer ${token}` } })
+    return res.data
+  },
 }

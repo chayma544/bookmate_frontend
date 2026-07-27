@@ -49,10 +49,12 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('token')
   }
 
+  const updateUser = (patch) => setUser((u) => (u ? { ...u, ...patch } : u))
+
   const isAdmin = user?.email === ADMIN_EMAIL
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout, isAdmin }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, logout, isAdmin, updateUser }}>
       {children}
     </AuthContext.Provider>
   )
