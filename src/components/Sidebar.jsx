@@ -1,6 +1,7 @@
 import React from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useChat } from '../context/ChatContext'
 
 const NAV = [
   {
@@ -64,6 +65,7 @@ const ADMIN_NAV = [
 
 export default function Sidebar() {
   const { user, logout, isAdmin } = useAuth()
+  const { totalUnread } = useChat()
   const navigate = useNavigate()
   const navItems = isAdmin ? [...NAV, ...ADMIN_NAV] : NAV
 
@@ -126,8 +128,13 @@ export default function Sidebar() {
 
       <div className="px-3 py-4 border-t border-[#e2ddd4]">
         <div className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-[#f3e4d5] cursor-pointer transition-colors">
-          <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold text-white flex-shrink-0 bg-primary shadow-sm">
+          <div className="relative w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold text-white flex-shrink-0 bg-primary shadow-sm">
             {initials}
+            {totalUnread > 0 && (
+              <span className="absolute -top-1 -right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-semibold text-white ring-2 ring-secondary">
+                {totalUnread > 9 ? '9+' : totalUnread}
+              </span>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-ink truncate">{fullName || 'User'}</p>

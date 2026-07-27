@@ -311,7 +311,14 @@ export default function BookDetail() {
             <p className="mt-1 text-sm text-[#6b5744]">by {book.author}</p>
             {ownerName && (
               <p className="mt-3 text-xs text-[#9d7c5e]">
-                Owned by <span className="font-medium text-[#6b5744]">{isOwner ? 'you' : ownerName}</span>
+                Owned by{' '}
+                {isOwner ? (
+                  <span className="font-medium text-[#6b5744]">you</span>
+                ) : (
+                  <Link to={`/app/users/${book.ownerId}`} className="font-medium text-[#6b5744] hover:text-primary hover:underline">
+                    {ownerName}
+                  </Link>
+                )}
                 {!isOwner && (
                   <>
                     {' · '}
