@@ -14,6 +14,7 @@ import AdminUsers from './pages/AdminUsers'
 import AddUser from './pages/AddUser'
 import EditUser from './pages/EditUser'
 import AdminReports from './pages/AdminReports'
+import AdminReturnDisputes from './pages/AdminReturnDisputes'
 import UserProfile from './pages/UserProfile'
 import AppLayout from './layouts/AppLayout'
 import Loading from './components/Loading'
@@ -54,6 +55,7 @@ export default function App() {
           <Route path="admin/users/:id/edit" element={<AdminProtected><EditUser /></AdminProtected>} />
           <Route path="admin/users" element={<AdminProtected><AdminUsers /></AdminProtected>} />
           <Route path="admin/reports" element={<AdminProtected><AdminReports /></AdminProtected>} />
+          <Route path="admin/return-disputes" element={<AdminProtected><AdminReturnDisputes /></AdminProtected>} />
         </Route>
       </Routes>
     </AuthProvider>

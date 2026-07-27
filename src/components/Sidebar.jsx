@@ -61,6 +61,13 @@ const ADMIN_NAV = [
       <path d="M5 3v18M5 4h11l-1.5 3.5L16 11H5" />
     ),
   },
+  {
+    to: '/app/admin/return-disputes',
+    label: 'Returns',
+    icon: (
+      <path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 8v5l3 2" />
+    ),
+  },
 ]
 
 export default function Sidebar() {

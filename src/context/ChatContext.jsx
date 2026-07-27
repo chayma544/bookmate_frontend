@@ -104,12 +104,18 @@ export function ChatProvider({ children }) {
           loadThread(otherId)
         } else {
           setUnreadCounts((c) => ({ ...c, [otherId]: (c[otherId] || 0) + 1 }))
-          const toast = { id: message.id, userId: otherId, content: message.content }
+          const toast = { id: message.id, type: 'message', userId: otherId, content: message.content }
           setToasts((t) => [...t, toast])
           setTimeout(() => dismissToast(toast.id), TOAST_TTL)
         }
         return wins
       })
+    }
+
+    const onReturnConfirmationRequested = ({ requestId, bookTitle, byName }) => {
+      const toast = { id: `return-${requestId}-${Date.now()}`, type: 'return', requestId, bookTitle, byName }
+      setToasts((t) => [...t, toast])
+      setTimeout(() => dismissToast(toast.id), TOAST_TTL)
     }
 
     const onMessagesRead = ({ by }) => {
@@ -127,12 +133,14 @@ export function ChatProvider({ children }) {
 
     socket.on('message:new', onNewMessage)
     socket.on('messages:read', onMessagesRead)
+    socket.on('return:confirmation-requested', onReturnConfirmationRequested)
     socket.on('presence:online', onOnline)
     socket.on('presence:offline', onOffline)
 
     return () => {
       socket.off('message:new', onNewMessage)
       socket.off('messages:read', onMessagesRead)
+      socket.off('return:confirmation-requested', onReturnConfirmationRequested)
       socket.off('presence:online', onOnline)
       socket.off('presence:offline', onOffline)
     }

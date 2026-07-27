@@ -31,6 +31,8 @@ function RequestCard({ req, perspective, onAccept, onDecline, onReturn, busy }) 
 
   const isActive = req.status === 'APPROVED' && !req.returnedAt
   const canReturn = isActive && !(req.type === 'SWAP' && req.swapMode === 'PERMANENT')
+  const myConfirmed = perspective === 'incoming' ? req.returnConfirmedByOwner : req.returnConfirmedByBorrower
+  const theirConfirmed = perspective === 'incoming' ? req.returnConfirmedByBorrower : req.returnConfirmedByOwner
 
   return (
     <div className="rounded-xl border border-[#efe0cf] bg-white p-4">
@@ -62,9 +64,18 @@ function RequestCard({ req, perspective, onAccept, onDecline, onReturn, busy }) 
           <button disabled={busy} onClick={() => onDecline(req)} className="rounded-full border border-[#e2ddd4] px-3 py-1 text-xs text-[#6b5744] hover:bg-[#f5ede0] disabled:opacity-60">Decline</button>
         </div>
       )}
-      {canReturn && (
+      {canReturn && !myConfirmed && !theirConfirmed && (
         <div className="mt-3">
           <button disabled={busy} onClick={() => onReturn(req)} className="rounded-full border border-[#d8c5b3] px-3 py-1 text-xs font-medium text-[#6b5744] hover:bg-[#f5ede0] disabled:opacity-60">Mark as returned</button>
+        </div>
+      )}
+      {canReturn && myConfirmed && !theirConfirmed && (
+        <p className="mt-3 text-xs text-[#9d7c5e]">Waiting for {otherName} to confirm the return.</p>
+      )}
+      {canReturn && !myConfirmed && theirConfirmed && (
+        <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
+          <p className="text-xs text-amber-800">{otherName} confirmed this was returned — do you confirm?</p>
+          <button disabled={busy} onClick={() => onReturn(req)} className="mt-2 rounded-full bg-amber-600 px-3 py-1 text-xs font-semibold text-white hover:bg-amber-700 disabled:opacity-60">Confirm return</button>
         </div>
       )}
     </div>

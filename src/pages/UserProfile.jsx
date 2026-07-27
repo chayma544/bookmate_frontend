@@ -195,13 +195,24 @@ export default function UserProfile() {
                 )}
               </div>
 
-              {rating.canRate && (
-                <div className="rounded-xl border border-[#e2ddd4] bg-white p-5">
-                  <h3 className="mb-2 text-sm font-semibold text-[#1e1810]">Rate {profile.firstName}</h3>
-                  <p className="mb-2 text-xs text-[#6b5744]">Based on your experience exchanging books together.</p>
-                  <RatingStars value={rating.myRating?.value || 0} onChange={ratingBusy ? undefined : rateProfile} />
-                </div>
-              )}
+              <div className="rounded-xl border border-[#e2ddd4] bg-white p-5">
+                <h3 className="mb-2 text-sm font-semibold text-[#1e1810]">Rate {profile.firstName}</h3>
+                {rating.canRate ? (
+                  <>
+                    <p className="mb-2 text-xs text-[#6b5744]">Based on your experience exchanging books together.</p>
+                    <RatingStars value={rating.myRating?.value || 0} onChange={ratingBusy ? undefined : rateProfile} />
+                  </>
+                ) : (
+                  <>
+                    <p className="mb-2 text-xs text-[#9d7c5e]">
+                      You'll be able to rate {profile.firstName} once you've borrowed or swapped a book together and it's been returned.
+                    </p>
+                    <div className="pointer-events-none opacity-40">
+                      <RatingStars value={0} readOnly />
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
 
             <div className="lg:col-span-2">
