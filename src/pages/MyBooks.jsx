@@ -16,6 +16,7 @@ function toFormShape(book) {
     author: book.author,
     genre: book.genre || book.category || '',
     imageUrl: book.imageUrl || book.image || '',
+    description: book.description || '',
   }
 }
 
@@ -43,6 +44,7 @@ export default function MyBooks() {
       author: form.author,
       category: form.genre,
       image: form.imageUrl,
+      description: form.description,
     }, token)
     await loadBooks()
     setEditingBook(null)

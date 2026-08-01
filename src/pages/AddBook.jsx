@@ -14,6 +14,7 @@ export default function AddBook() {
       author: form.author,
       category: form.genre,
       image: form.imageUrl,
+      description: form.description,
     }, token)
     navigate('/app')
   }
