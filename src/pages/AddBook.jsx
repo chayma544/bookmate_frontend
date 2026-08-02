@@ -24,7 +24,7 @@ export default function AddBook() {
       <button onClick={() => navigate(-1)} className="mb-5 inline-flex items-center gap-1 text-sm font-medium text-[#8B3A0F] hover:underline">
         ← Back
       </button>
-      <div className="max-w-4xl bg-white rounded-xl border border-[#e2ddd4] p-6">
+      <div className="max-w-4xl">
         <h1 className="text-xl font-bold text-[#1e1810] font-serif mb-5">Add a book</h1>
         <BookForm onSubmit={handleSubmit} onCancel={() => navigate('/app')} submitLabel="Add book" />
       </div>

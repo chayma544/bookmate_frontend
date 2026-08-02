@@ -62,7 +62,7 @@ export default function EditUser() {
       <button onClick={() => navigate(-1)} className="mb-5 inline-flex items-center gap-1 text-sm font-medium text-[#8B3A0F] hover:underline">
         ← Back
       </button>
-      <div className="max-w-lg bg-white rounded-xl border border-[#e2ddd4] p-6">
+      <div className="max-w-lg">
         <h1 className="text-xl font-bold text-[#1e1810] font-serif mb-5">Edit user</h1>
 
         {loadError && <p className="mb-3 text-[11px] text-red-600">{loadError}</p>}

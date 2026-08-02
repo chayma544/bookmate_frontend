@@ -41,7 +41,7 @@ export default function AddUser() {
       <button onClick={() => navigate(-1)} className="mb-5 inline-flex items-center gap-1 text-sm font-medium text-[#8B3A0F] hover:underline">
         ← Back
       </button>
-      <div className="max-w-lg bg-white rounded-xl border border-[#e2ddd4] p-6">
+      <div className="max-w-lg">
         <h1 className="text-xl font-bold text-[#1e1810] font-serif mb-5">Add a user</h1>
 
         <div className="space-y-3 mb-5">
