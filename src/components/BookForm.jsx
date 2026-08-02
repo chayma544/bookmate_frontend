@@ -44,37 +44,46 @@ export default function BookForm({ initial, onSubmit, onCancel, submitLabel }) {
 
   return (
     <div>
-      <div className="space-y-3 mb-5">
+      <div className="mb-5">
         <BookLookup onSelect={applyLookup} />
-        {[['Title','title','e.g. The Alchemist'],['Author','author','e.g. Paulo Coelho'],['Genre','genre','e.g. Fiction']].map(([label,key,ph]) => (
-          <div key={key}>
-            <label className="block text-xs text-[#6b5744] mb-1">{label}</label>
-            <input className={inputClass} value={form[key]} onChange={e => set(key, e.target.value)} placeholder={ph} />
-          </div>
-        ))}
-        <div>
-          <label className="block text-xs text-[#6b5744] mb-1">Description</label>
-          <textarea
-            className={inputClass}
-            rows={3}
-            value={form.description || ''}
-            onChange={e => set('description', e.target.value)}
-            placeholder="A short summary — filled in automatically if you use the lookup above"
-          />
-        </div>
-        <ImageUploadField
-          label="Cover image"
-          value={form.imageUrl}
-          onChange={(url) => set('imageUrl', url)}
-          onUploadingChange={setUploading}
-          previewAlt="Cover preview"
-        />
-        {initial && (
-          <p className="text-[11px] text-[#9d7c5e]">
-            Status is managed automatically as borrow and swap requests are approved or returned — it isn't set manually.
-          </p>
-        )}
       </div>
+
+      <div className="grid gap-6 lg:grid-cols-2 mb-5">
+        <div className="space-y-3">
+          {[['Title','title','e.g. The Alchemist'],['Author','author','e.g. Paulo Coelho'],['Genre','genre','e.g. Fiction']].map(([label,key,ph]) => (
+            <div key={key}>
+              <label className="block text-xs text-[#6b5744] mb-1">{label}</label>
+              <input className={inputClass} value={form[key]} onChange={e => set(key, e.target.value)} placeholder={ph} />
+            </div>
+          ))}
+          <div>
+            <label className="block text-xs text-[#6b5744] mb-1">Description</label>
+            <textarea
+              className={inputClass}
+              rows={7}
+              value={form.description || ''}
+              onChange={e => set('description', e.target.value)}
+              placeholder="A short summary — filled in automatically if you use the lookup above"
+            />
+          </div>
+        </div>
+
+        <div>
+          <ImageUploadField
+            label="Cover image"
+            value={form.imageUrl}
+            onChange={(url) => set('imageUrl', url)}
+            onUploadingChange={setUploading}
+            previewAlt="Cover preview"
+          />
+          {initial && (
+            <p className="mt-3 text-[11px] text-[#9d7c5e]">
+              Status is managed automatically as borrow and swap requests are approved or returned — it isn't set manually.
+            </p>
+          )}
+        </div>
+      </div>
+
       {saveError && <p className="mb-3 text-[11px] text-red-600">{saveError}</p>}
       <div className="flex justify-end gap-2">
         <Button variant="secondary" onClick={onCancel}>Cancel</Button>

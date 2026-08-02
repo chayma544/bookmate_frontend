@@ -10,6 +10,7 @@ import BorrowRequests from './pages/BorrowRequests'
 import Profile from './pages/Profile'
 import AddBook from './pages/AddBook'
 import BookDetail from './pages/BookDetail'
+import EditBook from './pages/EditBook'
 import AdminUsers from './pages/AdminUsers'
 import AddUser from './pages/AddUser'
 import EditUser from './pages/EditUser'
@@ -47,6 +48,7 @@ export default function App() {
           <Route path="marketplace" element={<Marketplace />} />
           <Route path="my-books" element={<MyBooks />} />
           <Route path="books/new" element={<AddBook />} />
+          <Route path="books/:id/edit" element={<EditBook />} />
           <Route path="books/:id" element={<BookDetail />} />
           <Route path="requests" element={<BorrowRequests />} />
           <Route path="profile" element={<Profile />} />

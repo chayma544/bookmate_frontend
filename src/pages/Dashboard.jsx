@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import Modal from '../components/Modal'
 import Button from '../components/Button'
 import BookCard from '../components/BookCard'
-import BookForm from '../components/BookForm'
 import bookService from '../services/bookService'
 import requestService from '../services/requestService'
 import { timeAgo } from '../utils/time'
@@ -32,10 +30,10 @@ function findActiveRequestForBook(requests, bookId) {
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 export default function Dashboard() {
   const { user, token } = useAuth()
+  const navigate = useNavigate()
   const [books, setBooks]   = useState([])
   const [requests, setRequests] = useState([])
   const [search, setSearch] = useState('')
-  const [modal, setModal]   = useState(null)
   const [loadError, setLoadError] = useState('')
   const [actionError, setActionError] = useState('')
   const [busyId, setBusyId] = useState(null)
@@ -60,17 +58,6 @@ export default function Dashboard() {
     b.title.toLowerCase().includes(search.toLowerCase()) ||
     b.author.toLowerCase().includes(search.toLowerCase())
   )
-
-  const editBook = async (form) => {
-    await bookService.update(modal.book.id, {
-      title: form.title,
-      author: form.author,
-      category: form.genre,
-      image: form.imageUrl,
-    }, token)
-    await loadAll()
-    setModal(null)
-  }
 
   const delBook = async (id) => {
     await bookService.delete(id, token)
@@ -99,7 +86,6 @@ export default function Dashboard() {
     .sort((a, b) => new Date(b.requestDate) - new Date(a.requestDate))
 
   return (
-    <>
       <div className="p-7" style={{ background: '#e1dac9', minHeight: '100%' }}>
 
         {/* top bar */}
@@ -139,7 +125,7 @@ export default function Dashboard() {
                       key={book.id}
                       book={book}
                       dueDate={activeReq?.dueDate}
-                      onEdit={(selectedBook) => setModal({ book: selectedBook })}
+                      onEdit={(selectedBook) => navigate(`/app/books/${selectedBook.id}/edit`)}
                       onDelete={delBook}
                       onReturn={activeReq ? () => returnBook(activeReq) : undefined}
                     />
@@ -219,11 +205,5 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-
-      {/* modals */}
-      <Modal isOpen={!!modal?.book} onClose={() => setModal(null)} title="Edit book">
-        <BookForm initial={modal?.book} onSubmit={editBook} onCancel={() => setModal(null)} submitLabel="Save changes" />
-      </Modal>
-    </>
   )
 }

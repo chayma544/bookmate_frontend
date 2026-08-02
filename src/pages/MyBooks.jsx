@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import BookCard from '../components/BookCard'
 import PageHeader from '../components/PageHeader'
-import Modal from '../components/Modal'
-import BookForm from '../components/BookForm'
 import { useAuth } from '../context/AuthContext'
 import bookService from '../services/bookService'
 
@@ -10,21 +9,11 @@ function errorMessage(err, fallback) {
   return err?.response?.data?.message || err?.message || fallback
 }
 
-function toFormShape(book) {
-  return {
-    title: book.title,
-    author: book.author,
-    genre: book.genre || book.category || '',
-    imageUrl: book.imageUrl || book.image || '',
-    description: book.description || '',
-  }
-}
-
 export default function MyBooks() {
   const { user, token } = useAuth()
+  const navigate = useNavigate()
   const [books, setBooks] = useState([])
   const [error, setError] = useState('')
-  const [editingBook, setEditingBook] = useState(null)
 
   const loadBooks = useCallback(async () => {
     try {
@@ -37,18 +26,6 @@ export default function MyBooks() {
   }, [token, user])
 
   useEffect(() => { if (user) loadBooks() }, [user, loadBooks])
-
-  const handleEditSubmit = async (form) => {
-    await bookService.update(editingBook.id, {
-      title: form.title,
-      author: form.author,
-      category: form.genre,
-      image: form.imageUrl,
-      description: form.description,
-    }, token)
-    await loadBooks()
-    setEditingBook(null)
-  }
 
   const handleDelete = async (id) => {
     try {
@@ -83,7 +60,7 @@ export default function MyBooks() {
                 <BookCard
                   key={book.id}
                   book={book}
-                  onEdit={(selectedBook) => setEditingBook({ id: selectedBook.id, ...toFormShape(selectedBook) })}
+                  onEdit={(selectedBook) => navigate(`/app/books/${selectedBook.id}/edit`)}
                   onDelete={handleDelete}
                 />
               ))}
@@ -91,10 +68,6 @@ export default function MyBooks() {
           </div>
         )}
       </div>
-
-      <Modal isOpen={!!editingBook} onClose={() => setEditingBook(null)} title="Edit book">
-        <BookForm initial={editingBook} onSubmit={handleEditSubmit} onCancel={() => setEditingBook(null)} submitLabel="Save changes" />
-      </Modal>
     </div>
   )
 }
