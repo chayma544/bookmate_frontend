@@ -29,7 +29,7 @@ function findActiveRequestForBook(requests, bookId) {
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 export default function Dashboard() {
-  const { user, token } = useAuth()
+  const { user, token, isAdmin } = useAuth()
   const navigate = useNavigate()
   const [books, setBooks]   = useState([])
   const [requests, setRequests] = useState([])
@@ -105,6 +105,21 @@ export default function Dashboard() {
               <Button variant="primary">+ Add book</Button>
             </Link>
           </div>
+        </div>
+
+        {/* about you */}
+        <div className="mb-6 flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center rounded-full bg-[#f5ede0] px-3 py-1 text-xs font-semibold text-primary">
+            {isAdmin ? 'Admin' : 'Member'}
+          </span>
+          <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
+            (user?.reportCount || 0) > 0 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-700'
+          }`}>
+            {(user?.reportCount || 0) > 0 ? `⚠ Reported ${user.reportCount} time${user.reportCount !== 1 ? 's' : ''}` : '✓ No reports'}
+          </span>
+          <span className="inline-flex items-center rounded-full bg-[#f5ede0] px-3 py-1 text-xs font-semibold text-primary">
+            {incomingPending.length} pending request{incomingPending.length !== 1 ? 's' : ''}
+          </span>
         </div>
 
         {/* books cards */}

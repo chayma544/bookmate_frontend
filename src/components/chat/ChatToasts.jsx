@@ -11,16 +11,16 @@ export default function ChatToasts() {
   return (
     <div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
       {toasts.map((t) => {
-        if (t.type === 'return') {
+        if (t.type === 'notification') {
           return (
             <button
               key={t.id}
               type="button"
-              onClick={() => { navigate('/app/requests'); dismissToast(t.id) }}
+              onClick={() => { navigate(t.link || '/app'); dismissToast(t.id) }}
               className="w-72 rounded-xl border border-amber-200 bg-white p-3 text-left shadow-[0_8px_30px_rgba(0,0,0,0.15)]"
             >
-              <p className="text-sm font-semibold text-[#1e1810]">📚 Return confirmation</p>
-              <p className="text-xs text-[#6b5744]">{t.byName} confirmed returning "{t.bookTitle}" — confirm on your side?</p>
+              <p className="text-sm font-semibold text-[#1e1810]">🔔 {t.title}</p>
+              {t.body && <p className="text-xs text-[#6b5744]">{t.body}</p>}
             </button>
           )
         }

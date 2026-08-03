@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useCallback, useEffect, useRef, useState } from 'react'
 import { useAuth } from './AuthContext'
 import messageService from '../services/messageService'
+import notificationService from '../services/notificationService'
 import { connectSocket, disconnectSocket } from '../services/socket'
 
 const ChatContext = createContext()
@@ -14,6 +15,8 @@ export function ChatProvider({ children }) {
   const [unreadCounts, setUnreadCounts] = useState({})
   const [onlineUserIds, setOnlineUserIds] = useState(() => new Set())
   const [toasts, setToasts] = useState([])
+  const [notifications, setNotifications] = useState([])
+  const [unreadNotifications, setUnreadNotifications] = useState(0)
   const usersByIdRef = useRef({})
 
   useEffect(() => { usersByIdRef.current = usersById }, [usersById])
@@ -61,6 +64,12 @@ export function ChatProvider({ children }) {
     setToasts((t) => t.filter((x) => x.id !== id))
   }, [])
 
+  const markAllNotificationsRead = useCallback(() => {
+    setUnreadNotifications(0)
+    setNotifications((n) => n.map((x) => ({ ...x, read: true })))
+    if (token) notificationService.markAllRead(token).catch(() => {})
+  }, [token])
+
   const sendMessage = useCallback(async (userId, content) => {
     if (!token || !user) return
     const tempId = `temp-${Date.now()}`
@@ -90,6 +99,13 @@ export function ChatProvider({ children }) {
         setUnreadCounts(counts)
       })
       .catch(() => {})
+
+    notificationService.getAll(token)
+      .then(({ notifications: list, unreadCount }) => {
+        setNotifications(list)
+        setUnreadNotifications(unreadCount)
+      })
+      .catch(() => {})
   }, [token, upsertUser])
 
   useEffect(() => {
@@ -112,8 +128,10 @@ export function ChatProvider({ children }) {
       })
     }
 
-    const onReturnConfirmationRequested = ({ requestId, bookTitle, byName }) => {
-      const toast = { id: `return-${requestId}-${Date.now()}`, type: 'return', requestId, bookTitle, byName }
+    const onNotificationNew = (notification) => {
+      setNotifications((n) => [notification, ...n])
+      setUnreadNotifications((c) => c + 1)
+      const toast = { id: notification.id, type: 'notification', title: notification.title, body: notification.body, link: notification.link }
       setToasts((t) => [...t, toast])
       setTimeout(() => dismissToast(toast.id), TOAST_TTL)
     }
@@ -133,14 +151,14 @@ export function ChatProvider({ children }) {
 
     socket.on('message:new', onNewMessage)
     socket.on('messages:read', onMessagesRead)
-    socket.on('return:confirmation-requested', onReturnConfirmationRequested)
+    socket.on('notification:new', onNotificationNew)
     socket.on('presence:online', onOnline)
     socket.on('presence:offline', onOffline)
 
     return () => {
       socket.off('message:new', onNewMessage)
       socket.off('messages:read', onMessagesRead)
-      socket.off('return:confirmation-requested', onReturnConfirmationRequested)
+      socket.off('notification:new', onNotificationNew)
       socket.off('presence:online', onOnline)
       socket.off('presence:offline', onOffline)
     }
@@ -163,6 +181,9 @@ export function ChatProvider({ children }) {
     sendMessage,
     dismissToast,
     usersById,
+    notifications,
+    unreadNotifications,
+    markAllNotificationsRead,
   }
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>

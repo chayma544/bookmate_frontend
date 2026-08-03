@@ -2,6 +2,7 @@ import React from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useChat } from '../context/ChatContext'
+import NotificationBell from './NotificationBell'
 
 const NAV = [
   {
@@ -89,14 +90,17 @@ export default function Sidebar() {
   return (
     <aside className="w-60 flex-shrink-0 flex flex-col bg-secondary text-ink border-r border-[#e2ddd4]">
       <div className="px-5 py-5">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-white shadow-sm">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5v-17Z" />
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-            </svg>
+        <div className="flex items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-white shadow-sm">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5v-17Z" />
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+              </svg>
+            </div>
+            <span className="text-ink font-serif font-bold text-lg tracking-wide">BookMate</span>
           </div>
-          <span className="text-ink font-serif font-bold text-lg tracking-wide">BookMate</span>
+          <NotificationBell />
         </div>
         <p className="text-xs mt-1.5 pl-[42px] text-[#6b5744] leading-snug">if you adore books, you're in the right place!</p>
       </div>
